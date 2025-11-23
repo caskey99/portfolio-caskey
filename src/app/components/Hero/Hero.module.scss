@@ -1,0 +1,81 @@
+.hero {
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  padding-top: 80px; // Отступ под хедер (если есть)
+}
+
+.container {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  height: 100%;
+  align-items: flex-end; // Выравнивание по низу
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+    align-items: center;
+    padding-bottom: 2rem;
+  }
+}
+
+.nameCol h1 {
+  font-size: 4rem;
+  line-height: 1;
+  text-transform: uppercase;
+  
+  @media (max-width: 768px) {
+    font-size: 2.5rem;
+    order: 1; // На телефоне сверху
+    text-align: center;
+    margin-bottom: 20px;
+  }
+}
+
+.jobCol h2 {
+  font-size: 2rem;
+  text-align: right;
+  color: #888;
+  
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+    order: 3; // На телефоне снизу
+    text-align: center;
+    margin-top: 20px;
+  }
+}
+
+.photoCol {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  
+  @media (max-width: 768px) {
+    order: 2; // Фото посередине
+    height: 50vh;
+  }
+}
+
+.imageWrapper {
+  width: 100%;
+  max-width: 500px;
+  height: 90%; // Не до самого верха
+  position: relative;
+}
+
+.placeholderImg {
+  width: 100%;
+  height: 100%;
+  background: #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-top-left-radius: 200px;
+  border-top-right-radius: 200px;
+  // Здесь должно быть: object-fit: cover для Image
+}
