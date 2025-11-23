@@ -3,24 +3,23 @@ import { useState } from 'react';
 import Preloader from '@/app/components/Preloader';
 import Hero from '@/app/components/Hero';
 import Projects from '@/app/components/Projects';
-import styles from './page.module.scss'; // Пустой файл или стили контейнера
 
 export default function Home() {
-  const [loading, setLoading] = useState(true);
+  // Состояние: началась ли анимация главного экрана?
+  const [heroAnimationStart, setHeroAnimationStart] = useState(false);
 
   return (
     <main>
-      {/* Прелоадер висит в DOM пока не завершится */}
-      {loading && <Preloader onComplete={() => setLoading(false)} />}
+      {/* Preloader не исчезает из DOM сразу, он уезжает вверх.
+         onComplete сработает в момент НАЧАЛА движения шторы вверх.
+      */}
+      <Preloader onComplete={() => setHeroAnimationStart(true)} />
       
-      {/* Показываем контент, но он скрыт за шторой прелоадера в момент анимации */}
-      {!loading && (
-        <>
-          <Hero />
-          <Projects />
-          {/* Добавьте Footer и другие секции */}
-        </>
-      )}
+      {/* Передаем команду "На старт!" в Hero */}
+      <Hero startAnimation={heroAnimationStart} />
+      
+      {/* Остальные секции можно показывать сразу или тоже анимировать */}
+      <Projects />
     </main>
   );
 }

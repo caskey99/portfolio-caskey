@@ -3,79 +3,145 @@
   width: 100%;
   overflow: hidden;
   position: relative;
-  padding-top: 80px; // Отступ под хедер (если есть)
+  /* Фон задается глобально в body, здесь прозрачный */
 }
 
 .container {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  max-width: 1800px;
   height: 100%;
-  align-items: flex-end; // Выравнивание по низу
-  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 2rem;
-
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr auto;
-    align-items: center;
-    padding-bottom: 2rem;
-  }
-}
-
-.nameCol h1 {
-  font-size: 4rem;
-  line-height: 1;
-  text-transform: uppercase;
+  /* Убираем нижний padding, чтобы фото касалось края */
+  padding: 0 3rem 0 3rem; 
   
-  @media (max-width: 768px) {
-    font-size: 2.5rem;
-    order: 1; // На телефоне сверху
-    text-align: center;
-    margin-bottom: 20px;
-  }
+  display: grid;
+  grid-template-columns: 1fr auto 1fr; 
+  /* Выравниваем элементы по центру вертикали (базовое положение для текста) */
+  align-items: center; 
 }
 
-.jobCol h2 {
-  font-size: 2rem;
+/* --- КОЛОНКИ --- */
+
+.colLeft {
+  display: flex;
+  justify-content: flex-start;
+  /* Поднимаем текст визуально выше центра (к уровню головы) */
+  padding-bottom: 20vh; 
+}
+
+.colRight {
+  display: flex;
+  justify-content: flex-end;
   text-align: right;
-  color: #888;
-  
-  @media (max-width: 768px) {
-    font-size: 1.5rem;
-    order: 3; // На телефоне снизу
-    text-align: center;
-    margin-top: 20px;
-  }
+  /* Поднимаем текст визуально выше центра */
+  padding-bottom: 20vh;
 }
 
-.photoCol {
-  height: 100%;
+.colCenter {
+  /* ВАЖНО: Переопределяем выравнивание только для фото -> прижимаем к низу */
+  align-self: flex-end; 
   display: flex;
   justify-content: center;
-  align-items: flex-end;
-  
-  @media (max-width: 768px) {
-    order: 2; // Фото посередине
-    height: 50vh;
-  }
-}
-
-.imageWrapper {
-  width: 100%;
-  max-width: 500px;
-  height: 90%; // Не до самого верха
   position: relative;
+  z-index: 10;
+  height: 100%; /* Занимает всю высоту, чтобы align-self сработал корректно внутри */
+  pointer-events: none; /* Пропускаем клики сквозь пустые места фото */
 }
 
-.placeholderImg {
+/* --- АНИМАЦИЯ И ФОТО --- */
+
+.imageMotionWrapper {
   width: 100%;
   height: 100%;
-  background: #ccc;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  border-top-left-radius: 200px;
-  border-top-right-radius: 200px;
-  // Здесь должно быть: object-fit: cover для Image
+  align-items: flex-end; /* Внутри обертки фото тоже внизу */
+  transform-origin: bottom center;
+}
+
+.imageContainer {
+  position: relative;
+  width: 45vw; 
+  max-width: 800px; 
+  
+  /* Высота 75vh - чтобы быть крупным, но оставить место сверху */
+  height: 75vh; 
+  
+  /* Убираем любые отступы снизу */
+  margin-bottom: 0; 
+}
+
+/* --- ТЕКСТ --- */
+
+.textMask {
+  overflow: hidden;
+}
+
+.name {
+  font-family: 'Space Grotesk', sans-serif; 
+  /* Размер шрифта чуть крупнее */
+  font-size: clamp(40px, 6vw, 120px); 
+  line-height: 0.9;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.job {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: #ccc;
+  line-height: 1.4;
+}
+
+/* --- АДАПТИВ (MOBILE) --- */
+@media (max-width: 900px) {
+  .container {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto; /* Сверху пространство для текста, снизу фото */
+    padding: 0; /* Убираем боковые отступы контейнера, чтобы фото было шире */
+  }
+
+  /* Фото на мобильном */
+  .colCenter {
+    order: 2; /* Фото внизу */
+    width: 100%;
+    align-self: flex-end;
+  }
+  
+  .imageContainer {
+    width: 100%;
+    height: 65vh; /* Чуть меньше на телефоне */
+    max-width: none;
+  }
+
+  /* Текст на мобильном */
+  /* Мы позиционируем его абсолютно сверху, чтобы он был над головой/на уровне головы */
+  
+  .colLeft {
+    position: absolute;
+    top: 15%; /* Отступ сверху */
+    left: 2rem;
+    padding-bottom: 0;
+    z-index: 20;
+    order: 1;
+  }
+  
+  .colRight {
+    position: absolute;
+    top: 15%; /* Тот же уровень, что и имя */
+    right: 2rem;
+    padding-bottom: 0;
+    z-index: 20;
+    order: 1;
+  }
+
+  .name {
+    font-size: 3rem; /* Крупно, но влезает */
+    text-shadow: 0 4px 20px rgba(0,0,0,0.8); /* Тень обязательна, если фото залезет под текст */
+  }
+
+  .job {
+    font-size: 1rem;
+    text-shadow: 0 4px 20px rgba(0,0,0,0.8);
+  }
 }

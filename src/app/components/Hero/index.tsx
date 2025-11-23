@@ -1,52 +1,105 @@
 'use client';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import styles from './Hero.module.scss';
+import heroImg from '@/app/assets/hero-image.png'; 
 
-// Замените '/hero.png' на путь к вашему реальному фото
-// Рекомендую фото в формате WebP для оптимизации
-import heroImg from '@/assets/hero-image.png'; 
+interface HeroProps {
+  startAnimation: boolean;
+}
 
-export default function Hero() {
+export default function Hero({ startAnimation }: HeroProps) {
+  
+  const textVariants = {
+    hidden: { y: "100%", opacity: 0 },
+    visible: { 
+      y: 0, 
+      opacity: 1,
+      transition: { 
+        duration: 0.8, 
+        ease: "easeOut",
+        delay: 0.2 
+      }
+    }
+  };
+
+  const imageVariants = {
+    hidden: { 
+      y: "110%", 
+      scale: 0.8, // Начинаем с 80% размера, чтобы не было слишком мелко
+      opacity: 0,
+      filter: "blur(10px)" 
+    },
+    visible: { 
+      y: 0, 
+      scale: 1, 
+      opacity: 1,
+      filter: "blur(0px)",
+      transition: { 
+        duration: 1.4, 
+        ease: [0.22, 1, 0.36, 1], 
+        delay: 0.6 
+      }
+    }
+  };
+
   return (
     <section className={styles.hero}>
       <div className={styles.container}>
         
-        {/* Левая часть: Имя */}
-        <motion.div 
-          className={styles.nameCol}
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 4.2, duration: 0.8 }}
-        >
-          <h1>Artem<br/>Zaitsev</h1>
-        </motion.div>
-
-        {/* Центр: Фото */}
-        <motion.div 
-            className={styles.photoCol}
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            transition={{ delay: 4, duration: 1, ease: "circOut" }}
-        >
-           <div className={styles.imageWrapper}>
-              {/* В реальном проекте используйте ваше фото */}
-              <div className={styles.placeholderImg}>
-                {/*  */}
-                 <span style={{color: '#000'}}>YOUR PHOTO HERE</span>
-              </div>
+        {/* Имя (Слева, поднято вверх стилями padding-bottom) */}
+        <div className={styles.colLeft}>
+           <div className={styles.textMask}>
+              <motion.div 
+                initial="hidden"
+                animate={startAnimation ? "visible" : "hidden"}
+                variants={textVariants}
+              >
+                <h1 className={styles.name}>
+                  ARTEM<br/>ZAITSEV
+                </h1>
+              </motion.div>
            </div>
-        </motion.div>
+        </div>
 
-        {/* Правая часть: Должность */}
-        <motion.div 
-          className={styles.jobCol}
-          initial={{ opacity: 0, x: 50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 4.2, duration: 0.8 }}
-        >
-          <h2>Frontend<br/>Developer</h2>
-        </motion.div>
+        {/* Фото (По центру, прижато к низу) */}
+        <div className={styles.colCenter}>
+            <motion.div 
+                className={styles.imageMotionWrapper}
+                initial="hidden"
+                animate={startAnimation ? "visible" : "hidden"}
+                variants={imageVariants}
+            >
+              <div className={styles.imageContainer}>
+                  <Image 
+                    src={heroImg} 
+                    alt="Artem Zaitsev"
+                    fill 
+                    priority 
+                    sizes="(max-width: 768px) 100vw, 45vw"
+                    style={{ 
+                        objectFit: 'contain', 
+                        objectPosition: 'bottom center' // Железобетонно к низу
+                    }}
+                  />
+              </div>
+            </motion.div>
+        </div>
+
+        {/* Должность (Справа, поднято вверх) */}
+        <div className={styles.colRight}>
+           <div className={styles.textMask}>
+              <motion.div 
+                initial="hidden"
+                animate={startAnimation ? "visible" : "hidden"}
+                variants={textVariants}
+              >
+                <h2 className={styles.job}>
+                  Frontend<br/>Developer
+                </h2>
+              </motion.div>
+           </div>
+        </div>
 
       </div>
     </section>

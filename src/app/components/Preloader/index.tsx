@@ -9,15 +9,13 @@ const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 export default function Preloader({ onComplete }: { onComplete: () => void }) {
   const curtainRef = useRef<HTMLDivElement>(null);
   const [iteration, setIteration] = useState(0);
-  // 1. Добавляем стейт для отслеживания, что мы на клиенте
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    // 2. Как только компонент загрузился в браузере, ставим true
     setIsMounted(true);
 
     let interval: NodeJS.Timeout;
-    const animationDuration = 2500;
+    const animationDuration = 2000; // Чуть ускорил текст для динамики
     const totalIterations = TARGET_TEXT.length; 
     const step = totalIterations / (animationDuration / 30); 
 
@@ -35,17 +33,21 @@ export default function Preloader({ onComplete }: { onComplete: () => void }) {
     };
 
     const finishAnimation = () => {
+        // Небольшая задержка перед стартом шторы
         setTimeout(() => {
-             const tl = gsap.timeline({
-                onComplete: () => onComplete()
-            });
+             const tl = gsap.timeline();
 
-            tl.to(curtainRef.current, {
+             tl.to(curtainRef.current, {
                 y: "-100%",
-                duration: 1.2,
-                ease: "power4.inOut",
+                duration: 1.5, // Время подъема шторы
+                ease: "power4.inOut", // Важно: запомни этот ease
+                onStart: () => {
+                    // ГЛАВНОЕ ИЗМЕНЕНИЕ: 
+                    // Сигнализируем странице, что штора поехала, ПРЯМО СЕЙЧАС
+                    onComplete();
+                }
             });
-        }, 300);
+        }, 200);
     };
 
     runTextAnimation();
@@ -55,19 +57,12 @@ export default function Preloader({ onComplete }: { onComplete: () => void }) {
 
   const renderText = () => {
     return TARGET_TEXT.split("").map((letter, index) => {
-      // Если буква уже "отгадана"
       if (index < Math.floor(iteration)) {
         return <span key={index} className={styles.locked}>{letter}</span>;
       }
-      
-      // 3. ВАЖНОЕ ИСПРАВЛЕНИЕ:
-      // Если мы на сервере или это первый рендер клиента - не используем Math.random().
-      // Возвращаем пробел той же ширины (моноширинный шрифт это позволяет).
       if (!isMounted) {
         return <span key={index} className={styles.scramble} style={{opacity: 0}}>-</span>;
       }
-
-      // Если мы уже "живые" в браузере - крутим рандом
       return (
         <span key={index} className={styles.scramble}>
           {CHARS[Math.floor(Math.random() * CHARS.length)]}
@@ -81,7 +76,6 @@ export default function Preloader({ onComplete }: { onComplete: () => void }) {
       <div className={styles.textContainer}>
         <h1 className={styles.glitchText}>
           {renderText()}
-          {/* Курсор тоже показываем только на клиенте, чтобы не дергался */}
           {isMounted && <span className={styles.cursor}>_</span>}
         </h1>
       </div>
