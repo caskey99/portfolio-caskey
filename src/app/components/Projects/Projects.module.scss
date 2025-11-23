@@ -1,57 +1,93 @@
 .section {
   position: relative;
-  z-index: 5; /* Выше чем Hero (z-index: 1) */
-  background-color: #050101; /* Тот же цвет фона, что и body, чтобы перекрывать Hero */
+  z-index: 10; /* Слой проектов */
   
-  /* Добавим отступ сверху, чтобы компенсировать прилипание, если нужно */
-  padding: 100px 2rem; 
+  /* Делаем фон прозрачным, чтобы видеть продолжение темной темы */
+  background: #050101; 
+  
+  /* Отступ сверху, чтобы проекты не прилипали сразу к ногам */
+  padding-top: 5rem; 
+  padding-bottom: 5rem;
+  min-height: 100vh;
+  
+  /* Визуальная коррекция границы */
+  margin-top: -5vh; 
+}
+
+.container {
   max-width: 1400px;
   margin: 0 auto;
-  
-  /* Сделаем верхнюю границу слегка размытой или с тенью для плавного перехода */
-  box-shadow: 0 -50px 100px #050101;
+  padding: 0 2rem;
 }
+
 .title {
-  font-size: 2rem;
-  margin-bottom: 3rem;
-  color: var(--accent-color);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 3rem;
+  margin-bottom: 4rem;
+  color: var(--accent-color, #fff);
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 3rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
 }
 
 .card {
   background: #111;
   border: 1px solid #222;
-  border-radius: 12px;
+  border-radius: 16px;
   overflow: hidden;
-  transition: transform 0.3s;
+  cursor: pointer;
+  transition: border-color 0.3s, transform 0.3s;
 
   &:hover {
+    border-color: #444;
     transform: translateY(-10px);
-    border-color: var(--accent-color);
+    
+    .imgPlaceholder {
+      transform: scale(1.05);
+    }
   }
 }
 
 .cardImage {
-  height: 200px;
+  height: 280px;
   background: #1a1a1a;
-  // Вставьте сюда <Image />
+  overflow: hidden;
 }
 
-.cardInfo {
+.imgPlaceholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, #222, #333);
+  transition: transform 0.5s ease;
+}
+
+.cardContent {
   padding: 1.5rem;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   
   h4 {
-    font-size: 1.25rem;
-    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+    color: #fff;
   }
   
-  p {
-    color: #888;
+  span {
+    color: #666;
     font-size: 0.9rem;
+    border: 1px solid #333;
+    padding: 4px 12px;
+    border-radius: 20px;
   }
 }
