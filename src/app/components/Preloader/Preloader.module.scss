@@ -4,7 +4,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: #000;
+  background-color: #050505; /* Глубокий черный */
   z-index: 9990;
   display: flex;
   justify-content: center;
@@ -12,17 +12,43 @@
 }
 
 .textContainer {
+  position: relative;
   overflow: hidden;
+  padding: 10px 20px;
 }
 
 .glitchText {
-  font-family: 'Courier New', monospace; // Моноширинный для эффекта кода
-  font-size: 2rem;
-  font-weight: bold;
-  color: var(--accent-color);
+  font-family: 'Space Mono', 'Courier New', monospace; /* Обязательно моноширинный */
+  font-size: 2.5rem;
+  font-weight: 700;
   text-transform: uppercase;
+  white-space: pre; /* Чтобы пробелы не схлопывались */
   
   @media (max-width: 768px) {
-    font-size: 1.2rem;
+    font-size: 1.4rem; /* Адаптив под телефон */
   }
+}
+
+/* Стиль для уже отгаданной буквы - Яркий и четкий */
+.locked {
+  color: #fff;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5); /* Легкое свечение */
+}
+
+/* Стиль для прыгающих букв - Тусклый и "технический" */
+.scramble {
+  color: #444; /* Темно-серый, чтобы не отвлекал */
+  opacity: 0.7;
+}
+
+/* Мигающий курсор в конце */
+.cursor {
+  color: var(--accent-color, #ff0000); /* Используй свой акцентный красный */
+  animation: blink 0.8s infinite;
+  margin-left: 2px;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }
