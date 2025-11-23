@@ -4,48 +4,78 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: #050505; /* Глубокий черный */
+  background-color: #050505;
   z-index: 9990;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+  /* Сохраняем это для плавности шторы */
+  will-change: transform;
+  /* Важно: скрываем всё, что может вылезти */
+  overflow: hidden; 
+}
+
+.textContainer {
+  position: relative;
+  /* ФИКС 1: Жестко фиксируем этот блок на GPU. 
+     Текст теперь как "наклейка", он не будет перерисовываться при движении родителя. */
+  transform: translateZ(0); 
+  backface-visibility: hidden;
+  
+  /* Центровка внутри */
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.textContainer {
-  position: relative;
-  overflow: hidden;
-  padding: 10px 20px;
-}
-
 .glitchText {
-  font-family: 'Space Mono', 'Courier New', monospace; /* Обязательно моноширинный */
+  font-family: 'Space Mono', 'Courier New', monospace;
   font-size: 2.5rem;
   font-weight: 700;
   text-transform: uppercase;
-  white-space: pre; /* Чтобы пробелы не схлопывались */
+  white-space: pre;
+  display: flex;
+  align-items: center;
   
+  /* ФИКС 2: УБИВАЕМ margin. 
+     Это главная причина прыжка. h1 имеет дефолтный margin, который схлопывается. */
+  margin: 0; 
+  padding: 0;
+  
+  /* ФИКС 3: Жесткая высота строки, равная 1 (без "воздуха") */
+  line-height: 1; 
+
   @media (max-width: 768px) {
-    font-size: 1.4rem; /* Адаптив под телефон */
+    font-size: 1.4rem;
   }
 }
 
-/* Стиль для уже отгаданной буквы - Яркий и четкий */
-.locked {
-  color: #fff;
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5); /* Легкое свечение */
+.locked, .scramble {
+  display: inline-block;
+  min-width: 1ch;
+  text-align: center;
+  /* ФИКС 4: Вертикальное выравнивание, чтобы буквы не скакали относительно курсора */
+  vertical-align: middle; 
 }
 
-/* Стиль для прыгающих букв - Тусклый и "технический" */
+.locked {
+  color: #fff;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
 .scramble {
-  color: #444; /* Темно-серый, чтобы не отвлекал */
+  color: #444;
   opacity: 0.7;
 }
 
-/* Мигающий курсор в конце */
 .cursor {
-  color: var(--accent-color, #ff0000); /* Используй свой акцентный красный */
-  animation: blink 0.8s infinite;
+  color: var(--accent-red, #ff1f1f);
   margin-left: 2px;
+  display: inline-block;
+  /* ФИКС 5: Курсор должен быть такой же высоты/позиции */
+  vertical-align: middle;
+  animation: blink 0.8s infinite;
 }
 
 @keyframes blink {
