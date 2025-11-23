@@ -1,21 +1,26 @@
-.hero {
+.heroSection {
+  height: 180vh; /* Достаточная высота для скролла */
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.stickyContainer {
+  position: sticky;
+  top: 0;
   height: 100vh;
   width: 100%;
   overflow: hidden;
-  position: relative;
-  /* Фон задается глобально в body, здесь прозрачный */
 }
 
-.container {
+.gridContainer {
   max-width: 1800px;
   height: 100%;
   margin: 0 auto;
-  /* Убираем нижний padding, чтобы фото касалось края */
-  padding: 0 3rem 0 3rem; 
+  padding: 0 3rem 0 3rem;
   
   display: grid;
   grid-template-columns: 1fr auto 1fr; 
-  /* Выравниваем элементы по центру вертикали (базовое положение для текста) */
   align-items: center; 
 }
 
@@ -24,7 +29,6 @@
 .colLeft {
   display: flex;
   justify-content: flex-start;
-  /* Поднимаем текст визуально выше центра (к уровню головы) */
   padding-bottom: 20vh; 
 }
 
@@ -32,42 +36,50 @@
   display: flex;
   justify-content: flex-end;
   text-align: right;
-  /* Поднимаем текст визуально выше центра */
   padding-bottom: 20vh;
 }
 
 .colCenter {
-  /* ВАЖНО: Переопределяем выравнивание только для фото -> прижимаем к низу */
+  /* Flex-end гарантирует, что блок стоит внизу */
   align-self: flex-end; 
   display: flex;
   justify-content: center;
+  
   position: relative;
   z-index: 10;
-  height: 100%; /* Занимает всю высоту, чтобы align-self сработал корректно внутри */
-  pointer-events: none; /* Пропускаем клики сквозь пустые места фото */
+  height: 100%; 
+  pointer-events: none; 
 }
 
-/* --- АНИМАЦИЯ И ФОТО --- */
+/* --- ФОТО --- */
 
 .imageMotionWrapper {
   width: 100%;
   height: 100%;
   display: flex;
-  align-items: flex-end; /* Внутри обертки фото тоже внизу */
-  transform-origin: bottom center;
+  /* Прижимаем содержимое к низу внутри враппера */
+  align-items: flex-end; 
+  justify-content: center;
+  
+  /* На всякий случай дублируем в CSS, хотя Framer перекроет инлайном */
+  transform-origin: bottom center; 
 }
 
 .imageContainer {
   position: relative;
   width: 45vw; 
   max-width: 800px; 
-  
-  /* Высота 75vh - чтобы быть крупным, но оставить место сверху */
   height: 75vh; 
+  margin-bottom: 0; /* Ноль отступа снизу */
   
-  /* Убираем любые отступы снизу */
-  margin-bottom: 0; 
+  /* Тень для объема при уменьшении */
+  filter: drop-shadow(0 10px 30px rgba(0,0,0,0.5));
+  
+  /* Чтобы скругление углов (borderRadius) работало */
+  will-change: transform, border-radius;
 }
+
+/* ... остальные стили текста и mobile (без изменений) ... */
 
 /* --- ТЕКСТ --- */
 
@@ -77,7 +89,6 @@
 
 .name {
   font-family: 'Space Grotesk', sans-serif; 
-  /* Размер шрифта чуть крупнее */
   font-size: clamp(40px, 6vw, 120px); 
   line-height: 0.9;
   font-weight: 800;
@@ -93,33 +104,33 @@
   line-height: 1.4;
 }
 
-/* --- АДАПТИВ (MOBILE) --- */
+/* --- MOBILE --- */
 @media (max-width: 900px) {
-  .container {
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr auto; /* Сверху пространство для текста, снизу фото */
-    padding: 0; /* Убираем боковые отступы контейнера, чтобы фото было шире */
+  /* На телефоне уменьшаем высоту скролла, чтобы не крутить долго */
+  .heroSection {
+    height: 140vh;
   }
 
-  /* Фото на мобильном */
+  .gridContainer {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto; 
+    padding: 0; 
+  }
+
   .colCenter {
-    order: 2; /* Фото внизу */
+    order: 2; 
     width: 100%;
     align-self: flex-end;
   }
   
   .imageContainer {
     width: 100%;
-    height: 65vh; /* Чуть меньше на телефоне */
-    max-width: none;
+    height: 65vh; 
   }
 
-  /* Текст на мобильном */
-  /* Мы позиционируем его абсолютно сверху, чтобы он был над головой/на уровне головы */
-  
   .colLeft {
     position: absolute;
-    top: 15%; /* Отступ сверху */
+    top: 15%; 
     left: 2rem;
     padding-bottom: 0;
     z-index: 20;
@@ -128,20 +139,10 @@
   
   .colRight {
     position: absolute;
-    top: 15%; /* Тот же уровень, что и имя */
+    top: 15%; 
     right: 2rem;
     padding-bottom: 0;
     z-index: 20;
     order: 1;
-  }
-
-  .name {
-    font-size: 3rem; /* Крупно, но влезает */
-    text-shadow: 0 4px 20px rgba(0,0,0,0.8); /* Тень обязательна, если фото залезет под текст */
-  }
-
-  .job {
-    font-size: 1rem;
-    text-shadow: 0 4px 20px rgba(0,0,0,0.8);
   }
 }

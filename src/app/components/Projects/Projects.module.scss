@@ -1,9 +1,16 @@
 .section {
-  padding: 100px 2rem;
+  position: relative;
+  z-index: 5; /* Выше чем Hero (z-index: 1) */
+  background-color: #050101; /* Тот же цвет фона, что и body, чтобы перекрывать Hero */
+  
+  /* Добавим отступ сверху, чтобы компенсировать прилипание, если нужно */
+  padding: 100px 2rem; 
   max-width: 1400px;
   margin: 0 auto;
+  
+  /* Сделаем верхнюю границу слегка размытой или с тенью для плавного перехода */
+  box-shadow: 0 -50px 100px #050101;
 }
-
 .title {
   font-size: 2rem;
   margin-bottom: 3rem;
