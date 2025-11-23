@@ -4,18 +4,19 @@ import gsap from 'gsap';
 import styles from './Preloader.module.scss';
 
 const TARGET_TEXT = "Artem Zaitsev Dev";
-// Используем более чистый набор символов (без спецзнаков), чтобы не резало глаз
 const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"; 
 
 export default function Preloader({ onComplete }: { onComplete: () => void }) {
   const curtainRef = useRef<HTMLDivElement>(null);
   const [iteration, setIteration] = useState(0);
+  // 1. Добавляем стейт для отслеживания, что мы на клиенте
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    // 2. Как только компонент загрузился в браузере, ставим true
+    setIsMounted(true);
+
     let interval: NodeJS.Timeout;
-    
-    // Длительность анимации текста (примерно 2.5 сек)
-    // Шаг инкремента (0.3) определяет скорость открытия букв
     const animationDuration = 2500;
     const totalIterations = TARGET_TEXT.length; 
     const step = totalIterations / (animationDuration / 30); 
@@ -23,20 +24,17 @@ export default function Preloader({ onComplete }: { onComplete: () => void }) {
     const runTextAnimation = () => {
       interval = setInterval(() => {
         setIteration(prev => {
-          // Если дошли до конца текста
           if (prev >= totalIterations) {
             clearInterval(interval);
             finishAnimation();
             return totalIterations;
           }
-          // Увеличиваем прогресс
           return prev + step;
         });
       }, 30);
     };
 
     const finishAnimation = () => {
-        // Небольшая пауза после расшифровки перед поднятием шторы
         setTimeout(() => {
              const tl = gsap.timeline({
                 onComplete: () => onComplete()
@@ -45,7 +43,7 @@ export default function Preloader({ onComplete }: { onComplete: () => void }) {
             tl.to(curtainRef.current, {
                 y: "-100%",
                 duration: 1.2,
-                ease: "power4.inOut", // Очень плавный, дорогой easing
+                ease: "power4.inOut",
             });
         }, 300);
     };
@@ -55,14 +53,21 @@ export default function Preloader({ onComplete }: { onComplete: () => void }) {
     return () => clearInterval(interval);
   }, [onComplete]);
 
-  // Рендерим текст побуквенно для стилизации
   const renderText = () => {
     return TARGET_TEXT.split("").map((letter, index) => {
-      // Если буква уже "отгадана" (индекс меньше итерации)
+      // Если буква уже "отгадана"
       if (index < Math.floor(iteration)) {
         return <span key={index} className={styles.locked}>{letter}</span>;
       }
-      // Если буква еще "шифруется"
+      
+      // 3. ВАЖНОЕ ИСПРАВЛЕНИЕ:
+      // Если мы на сервере или это первый рендер клиента - не используем Math.random().
+      // Возвращаем пробел той же ширины (моноширинный шрифт это позволяет).
+      if (!isMounted) {
+        return <span key={index} className={styles.scramble} style={{opacity: 0}}>-</span>;
+      }
+
+      // Если мы уже "живые" в браузере - крутим рандом
       return (
         <span key={index} className={styles.scramble}>
           {CHARS[Math.floor(Math.random() * CHARS.length)]}
@@ -76,7 +81,8 @@ export default function Preloader({ onComplete }: { onComplete: () => void }) {
       <div className={styles.textContainer}>
         <h1 className={styles.glitchText}>
           {renderText()}
-          <span className={styles.cursor}>_</span>
+          {/* Курсор тоже показываем только на клиенте, чтобы не дергался */}
+          {isMounted && <span className={styles.cursor}>_</span>}
         </h1>
       </div>
     </div>
