@@ -5,12 +5,18 @@ import Image from 'next/image';
 import styles from './Hero.module.scss';
 import heroImg from '@/app/assets/hero-image.png'; 
 
+// Данные проектов
 const projects = [
   { id: 1, title: "Crypto Fintech", cat: "Dashboard" },
   { id: 2, title: "AI Assistant", cat: "Interface" },
   { id: 3, title: "Cyber eCommerce", cat: "Shop" },
   { id: 4, title: "WebGL Portfolio", cat: "Experience" },
-  { id: 5, title: "Social Network", cat: "Mobile" },
+  { 
+    id: 5, 
+    title: "Social Network", 
+    cat: "Mobile", 
+    description: "Next-gen social platform focused on privacy and decentralized identity. Features end-to-end encryption and zero-knowledge proofs." 
+  },
 ];
 
 interface HeroProps {
@@ -25,28 +31,33 @@ export default function Hero({ startAnimation }: HeroProps) {
     offset: ["start start", "end end"]
   });
 
-  // --- ТАЙМЛАЙН ---
+  // --- ТАЙМЛАЙН ГЛАВНОГО ЭКРАНА ---
 
-  // 1. МОНИТОР (0% -> 10%): Мгновенное расширение
+  // 1. МОНИТОР (Быстрое раскрытие 0% -> 10%)
   const cardWidth = useTransform(scrollYProgress, [0, 0.1], ["30%", "100vw"]);
   const cardHeight = useTransform(scrollYProgress, [0, 0.1], ["0%", "100vh"]);
   const cardRadius = useTransform(scrollYProgress, [0, 0.1], ["100px", "0px"]);
   const cardBorder = useTransform(scrollYProgress, [0.09, 0.1], ["1px", "0px"]); 
   const cardOpacity = useTransform(scrollYProgress, [0, 0.05], [0, 1]);
 
-  // 2. ФОТОГРАФИЯ (0% -> 30%): Уходит вниз
+  // 2. ФОТОГРАФИЯ (Уход 10% -> 25%)
   const imageScale = useTransform(scrollYProgress, [0, 0.1], [1, 0.9]);
-  const imageY = useTransform(scrollYProgress, [0.1, 0.3], ["0%", "100%"]); 
-  const imageOpacity = useTransform(scrollYProgress, [0.25, 0.3], [1, 0]);
+  const imageY = useTransform(scrollYProgress, [0.1, 0.25], ["0%", "100%"]); 
+  const imageOpacity = useTransform(scrollYProgress, [0.2, 0.25], [1, 0]);
 
-  // 3. ТЕКСТ (0% -> 10%): Исчезает
+  // 3. ТЕКСТ (0% -> 10%)
   const textOpacity = useTransform(scrollYProgress, [0, 0.1], [1, 0]);
   const textLeftX = useTransform(scrollYProgress, [0, 0.1], [0, -300]);
   const textRightX = useTransform(scrollYProgress, [0, 0.1], [0, 300]);
 
-  // 4. ЭКРАН (0% -> 5%): Появляется фон
+  // 4. ЭКРАН (Фон)
   const screenOpacity = useTransform(scrollYProgress, [0, 0.05], [0, 1]);
 
+  // 5. ДВИЖЕНИЕ СЕТКИ (ЗАМОРОЗКА)
+  // Сетка движется до 0.85 (момент посадки последней карты), затем замирает.
+  const gridZ = useTransform(scrollYProgress, [0, 0.85], [0, 500]); 
+
+  // Входная анимация
   const introTextVariants = {
     hidden: { y: "100%", opacity: 0 },
     visible: { y: 0, opacity: 1, transition: { duration: 0.8, ease: "easeOut", delay: 0.2 } }
@@ -73,19 +84,37 @@ export default function Hero({ startAnimation }: HeroProps) {
             }}
           >
              <motion.div className={styles.monitorScreen} style={{ opacity: screenOpacity }}>
-                <div className={styles.gridBackground} />
+                {/* ФОН С ЗАМОРОЗКОЙ */}
+                <motion.div 
+                  className={styles.gridBackground} 
+                  style={{ z: gridZ }} // Движение по Z (на нас)
+                />
 
                 {/* ПОТОК КАРТОЧЕК */}
                 <div className={styles.tunnelContainer}>
-                  {projects.map((project, index) => (
-                    <TunnelCard 
-                      key={project.id} 
-                      index={index} 
-                      total={projects.length} 
-                      progress={scrollYProgress} 
-                      data={project}
-                    />
-                  ))}
+                  {projects.map((project, index) => {
+                    const isLast = index === projects.length - 1;
+                    
+                    if (isLast) {
+                      return (
+                        <LandingCard 
+                          key={project.id} 
+                          progress={scrollYProgress} 
+                          data={project} 
+                        />
+                      );
+                    }
+                    
+                    return (
+                      <FlyingCard 
+                        key={project.id} 
+                        index={index} 
+                        total={projects.length} 
+                        progress={scrollYProgress} 
+                        data={project}
+                      />
+                    );
+                  })}
                 </div>
              </motion.div>
           </motion.div>
@@ -148,85 +177,117 @@ export default function Hero({ startAnimation }: HeroProps) {
 
       </div>
       
-      {/* 500vh для долгого плавного полета */}
       <div style={{ height: '500vh' }}></div>
     </section>
   );
 }
 
-function TunnelCard({ index, total, progress, data }: { index: number, total: number, progress: MotionValue<number>, data: any }) {
-  // --- ЛОГИКА "ЗВЕЗДНОГО ПОЛЕТА" ---
-  
-  // 1. Старт полета (после раскрытия монитора)
+// --- 1. ЛЕТЯЩИЕ КАРТОЧКИ (ЛИНЕЙНЫЕ) ---
+function FlyingCard({ index, total, progress, data }: { index: number, total: number, progress: MotionValue<number>, data: any }) {
+  // Начинаем с 0.15, заканчиваем полет всех "мусорных" карточек к 0.80
   const START_OFFSET = 0.15; 
+  const END_OFFSET = 0.80; 
   
-  // 2. Длительность жизни одной карточки на экране (35% скролла)
-  // Это обеспечивает одинаковую скорость для всех.
-  const LIFESPAN = 0.35; 
-
-  // 3. Равномерное распределение: каждая следующая карточка вылетает с задержкой
-  // Мы распределяем их так, чтобы последняя исчезла ровно в 1.0
-  const totalDuration = 1.0 - START_OFFSET;
-  const step = (totalDuration - LIFESPAN) / (total - 1);
-
+  const step = (END_OFFSET - START_OFFSET) / (total - 1);
   const start = START_OFFSET + (index * step);
-  const end = start + LIFESPAN;
+  const end = start + 0.30; // Быстрый пролет
 
-  // --- КООРДИНАТЫ (Вектор движения) ---
-  // Четко: влево, вправо, влево, вправо...
-  const isLeft = index % 2 === 0;
-  
-  // Чтобы не было скучно, добавим немного вариативности по высоте (Y),
-  // но X всегда будет очень широким, чтобы уходить за экран.
-  
-  // X: Цель - уйти за пределы экрана (например, +/- 1800px)
-  const targetX = isLeft ? -1800 : 1800;
-  
-  // Y: Немного вверх или вниз, чтобы не перекрывать центр
-  const targetY = (index % 4 === 0 || index % 4 === 3) ? -400 : 400;
-
-  // --- АНИМАЦИЯ ---
-  
-  // Прогресс движения конкретной карточки (от 0 до 1)
+  // --- ЛИНЕЙНАЯ ТРАЕКТОРИЯ ---
   const life = useTransform(progress, [start, end], [0, 1]);
 
-  // Scale: От точки (0) до гиганта (3.5)
-  // Используем easeIn, чтобы она ускорялась при приближении к "лицу"
-  const scale = useTransform(life, (v) => 0.1 + (Math.pow(v, 2) * 3.5));
+  const isLeft = index % 2 === 0;
   
-  // Opacity: Быстрое появление в центре, дальше всегда видно
-  const opacity = useTransform(progress, 
-    [start, start + 0.05], 
-    [0, 1]
-  );
+  // X: Строго вбок
+  const targetX = isLeft ? -1500 : 1500;
+  // Y: Строго вверх/вниз (без синусоид, просто чередование)
+  // 0, 1 -> Вверх; 2, 3 -> Вниз
+  const targetY = (index % 4 < 2) ? -400 : 400;
 
-  // Движение: Линейная интерполяция от 0 до цели
-  // Карточка рождается в 0,0 и летит в targetX, targetY
+  // Scale: Растет линейно
+  const scale = useTransform(life, [0, 1], [0.1, 2.5]);
+  
+  // Opacity: Без исчезновения в конце
+  const opacity = useTransform(progress, [start, start + 0.05], [0, 1]);
+
   const x = useTransform(life, [0, 1], [0, targetX]);
   const y = useTransform(life, [0, 1], [0, targetY]);
   
-  const display = useTransform(progress, (v) => (v >= start ? "flex" : "none"));
+  const display = useTransform(progress, (v) => (v >= start && v < end ? "flex" : "none"));
 
   return (
     <motion.div 
       className={styles.tunnelCard}
-      style={{
-        scale, 
-        opacity, 
-        x, 
-        y,
-        display,
-        // Z-Index: Чем больше progress, тем ближе карточка к камере -> выше z-index
-        zIndex: Math.round(index * 10), 
-      }}
+      style={{ scale, opacity, x, y, display, zIndex: index }}
     >
-       <div className={styles.cardImage}>
-          {/* Placeholder или <Image /> */}
-       </div>
+       <div className={styles.cardImage} />
        <div className={styles.cardInfo}>
           <h3>{data.title}</h3>
           <p>{data.cat}</p>
        </div>
     </motion.div>
+  );
+}
+
+// --- 2. ПОСАДОЧНАЯ КАРТОЧКА (СЛЕВА) ---
+function LandingCard({ progress, data }: { progress: MotionValue<number>, data: any }) {
+  // Стартует, когда остальные уже почти улетели
+  const start = 0.75;
+  const landed = 0.90; // Момент фиксации
+
+  const life = useTransform(progress, [start, landed], [0, 1]);
+  
+  // Scale: Из центра (маленькая) до нормального размера
+  // scale 1 будет соответствовать размеру, заданному в CSS (.landingCard)
+  const scale = useTransform(life, [0, 1], [0.1, 1]);
+  
+  // Позиция: 
+  // Start: 0,0 (Центр)
+  // End: x = -25vw (Сдвиг влево), y = 0
+  const x = useTransform(life, [0, 1], ["0vw", "-25vw"]); 
+  const y = useTransform(life, [0, 1], ["0vh", "0vh"]);
+
+  const opacity = useTransform(progress, [start, start + 0.05], [0, 1]);
+  
+  // Текст: появляется только когда карточка села
+  const textOpacity = useTransform(progress, [landed, landed + 0.05], [0, 1]);
+  const textX = useTransform(progress, [landed, landed + 0.05], [50, 0]);
+
+  const display = useTransform(progress, (v) => (v >= start ? "flex" : "none"));
+
+  return (
+    <>
+      <motion.div 
+        className={`${styles.tunnelCard} ${styles.landingCard}`}
+        style={{ scale, x, y, opacity, display, zIndex: 100 }}
+      >
+         <div className={styles.cardImage} />
+         {/* Скрываем инфо внутри карточки, оно будет снаружи */}
+         <div className={styles.cardInfo} style={{ display: 'none' }} />
+      </motion.div>
+
+      {/* ОПИСАНИЕ (СПРАВА ОТ КАРТОЧКИ) */}
+      <motion.div 
+        className={styles.landingDescription}
+        style={{ 
+          opacity: textOpacity, 
+          x: textX,
+          display 
+        }}
+      >
+        <div className={styles.descHeader}>
+          <span>LATEST</span>
+          <h4>FEATURED WORK</h4>
+        </div>
+        
+        <h2 className={styles.descTitle}>{data.title}</h2>
+        <p className={styles.descText}>{data.description}</p>
+
+        <div className={styles.descTags}>
+           <span>React Native</span>
+           <span>Firebase</span>
+           <span>Web3</span>
+        </div>
+      </motion.div>
+    </>
   );
 }
