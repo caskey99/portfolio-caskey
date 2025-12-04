@@ -1,10 +1,9 @@
 .heroSection {
-  /* Высокая секция для долгого полета */
   height: 450vh; 
   width: 100%;
   position: relative;
   z-index: 1;
-  background-color: #050101; 
+  background-color: #050101; /* Темная комната */
 }
 
 .stickyContainer {
@@ -20,30 +19,24 @@
 /* --- МОНИТОР (РАМКА) --- */
 .monitorFrame {
   position: absolute;
-  bottom: 15vh; /* Висит над полом */
-
-  /* --- ИСПРАВЛЕНИЕ НАЧАЛО --- */
-  /* Убрали left: 50% и transform, так как Framer Motion перезаписывает transform. */
-  /* Используем margin: auto для жесткого центрирования. */
+  bottom: 15vh;
   left: 0;
   right: 0;
   margin: 0 auto;
-  /* --- ИСПРАВЛЕНИЕ КОНЕЦ --- */
   
   background: #000;
   border: 1px solid #333;
+  /* Добавим белое свечение от экрана "наружу" */
   box-shadow: 
     0 0 0 1px #111,
-    0 20px 50px rgba(0,0,0,0.9);
+    0 0 100px rgba(255, 255, 255, 0.15); 
   
   z-index: 5;
   overflow: hidden;
-  
-  /* Точка трансформации для выключения */
   transform-origin: center center;
 }
 
-/* --- ЭКРАН ВНУТРИ МОНИТОРА --- */
+/* --- ЭКРАН ВНУТРИ МОНИТОРА (БЕЛАЯ БЕСКОНЕЧНОСТЬ) --- */
 .monitorScreen {
   width: 100%;
   height: 100%;
@@ -51,41 +44,47 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background: radial-gradient(circle, #1a0505 0%, #000 100%);
+  /* Белый фон с легкой виньеткой для глубины */
+  background: radial-gradient(circle, #ffffff 0%, #f0f0f0 100%);
+  overflow: hidden;
 }
 
 .gridBackground {
   position: absolute;
   inset: 0;
+  /* Супер-тонкая серая сетка */
   background-image: 
-    linear-gradient(rgba(255, 31, 31, 0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 31, 31, 0.1) 1px, transparent 1px);
-  background-size: 40px 40px;
-  mask-image: radial-gradient(circle, black 40%, transparent 80%);
+    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  /* Маска, чтобы сетка исчезала к краям (ощущение бесконечности) */
+  mask-image: radial-gradient(circle, black 40%, transparent 90%);
 }
 
 .flashOverlay {
   position: absolute;
   inset: 0;
-  background: white;
+  background: black; /* Инверсия вспышки для выключения */
   z-index: 50;
   pointer-events: none;
 }
 
 .uiOverlay {
   position: absolute;
-  top: 1rem;
-  left: 1rem;
+  top: 1.5rem;
+  left: 1.5rem;
   display: flex;
   flex-direction: column;
   font-family: 'Space Mono', monospace;
   font-size: 10px;
-  color: var(--accent-red, #ff1f1f);
-  opacity: 0.7;
+  /* Темный текст интерфейса */
+  color: #111; 
+  font-weight: 600;
   z-index: 20;
+  mix-blend-mode: multiply;
 }
 
-/* --- 3D ТУННЕЛЬ --- */
+/* --- СПИРАЛЬНЫЙ ТУННЕЛЬ --- */
 .tunnelContainer {
   position: relative;
   width: 100%;
@@ -93,53 +92,77 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  perspective: 1000px; 
+  perspective: 1200px; /* Чуть больше перспективы для полета */
 }
 
 .tunnelCard {
   position: absolute;
-  /* ФИКС ПОЗИЦИОНИРОВАНИЯ КАРТОЧЕК: */
   inset: 0;
   margin: auto;
   
-  width: 60%; 
-  aspect-ratio: 16 / 9;
-  background: rgba(0, 0, 0, 0.8);
-  border: 1px solid var(--accent-red, #ff1f1f);
-  border-radius: 12px;
+  width: 300px; /* Фиксированный размер для аккуратности */
+  height: 400px;
+  
+  /* GLASSMORPHISM (Светлый стиль) */
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 
+    0 10px 40px rgba(0, 0, 0, 0.08), /* Мягкая тень */
+    0 1px 0 rgba(255, 255, 255, 0.6) inset; /* Блик сверху */
+  
+  border-radius: 20px;
   
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  padding: 10px;
+  gap: 10px;
   
-  will-change: transform, opacity;
+  will-change: transform, opacity, filter;
 }
 
-.cardInner {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.cardMockup {
+/* Место под фото */
+.cardImage {
   flex: 1;
-  background: #222;
+  background: #eee; /* Заглушка, если нет фото */
+  border-radius: 12px;
   position: relative;
+  overflow: hidden;
+  
+  img {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.5s ease;
+  }
 }
 
 .cardInfo {
-  padding: 1rem;
-  background: #0a0a0a;
-  border-top: 1px solid #333;
+  height: 60px;
+  padding: 0 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   
-  h3 { font-size: 1.5rem; color: #fff; margin-bottom: 0.2rem; }
-  p { font-size: 0.9rem; color: #888; text-transform: uppercase; }
-  
-  @media (max-width: 1200px) { h3 { font-size: 1rem; } }
+  h3 { 
+    font-size: 1rem; 
+    color: #111; 
+    font-weight: 600; 
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+  p { 
+    font-size: 0.75rem; 
+    color: #666; 
+    text-transform: uppercase; 
+    letter-spacing: 0.05em;
+    margin-top: 4px;
+  }
 }
 
-/* --- ОСТАЛЬНЫЕ ЭЛЕМЕНТЫ (HERO) --- */
+/* --- ВНЕШНИЙ КОНТЕНТ (В КОМНАТЕ) --- */
 .gridContainer {
   max-width: 1800px;
   height: 100%;

@@ -1,36 +1,69 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ⚡ Artem Zaitsev | Creative Frontend Portfolio 2025
 
-## Getting Started
+![Next.js](https://img.shields.io/badge/Next.js-16.0-black?style=for-the-badge&logo=next.js)
+![React](https://img.shields.io/badge/React-19.0-20232a?style=for-the-badge&logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178c6?style=for-the-badge&logo=typescript)
+![Sass](https://img.shields.io/badge/Sass-Modules-cc6699?style=for-the-badge&logo=sass)
+![GSAP](https://img.shields.io/badge/GSAP-3.13-88ce02?style=for-the-badge&logo=greensock)
+![Framer Motion](https://img.shields.io/badge/Framer_Motion-12.0-0055ff?style=for-the-badge&logo=framer)
 
-First, run the development server:
+> "Immersive web experience combining high-performance animations with modern React architecture."
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Погружающее веб-портфолио, демонстрирующее современные возможности фронтенд-разработки. Проект построен на базе **Next.js 16 (App Router)** с использованием гибридного подхода к анимациям для достижения кинематографического качества UI.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🌟 Особенности
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+* **Киберпанк эстетика:** Темная тема, неоновые акценты, глитч-эффекты и футуристичная типографика (Space Grotesk/Mono).
+* **Гибридная анимация:**
+    * **GSAP:** Используется для высоконагруженных анимаций (Preloader, Custom Cursor) для максимальной производительности.
+    * **Framer Motion:** Используется для сложных layout-переходов и скролл-эффектов (Hero Section, Projects Tunnel).
+* **3D Hero Tunnel:** Эффект бесконечного полета сквозь интерфейс монитора при скролле.
+* **Умный прелоадер:** Синхронизированный вход, предотвращающий дерганье контента при загрузке.
+* **Полная типизация:** Строгий TypeScript во всем проекте.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 🏗 Архитектура
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Проект следует принципам компонентной архитектуры и разделения ответственности.
+Все ключевые архитектурные решения, выбор библиотек и стратегии оптимизации задокументированы отдельно.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+👉 **[ЧИТАТЬ ARCHITECTURE DECISION LOG (ADL)](./ADL.md)**
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🚀 Быстрый старт
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Убедитесь, что у вас установлен **Node.js 20+**.
+
+1.  **Клонируйте репозиторий:**
+    ```bash
+    git clone [https://github.com/caskey99/portfolio-caskey.git](https://github.com/caskey99/portfolio-caskey.git)
+    cd portfolio-caskey
+    ```
+
+2.  **Установите зависимости:**
+    ```bash
+    npm install
+    # или
+    yarn install
+    ```
+
+3.  **Запустите сервер разработки:**
+    ```bash
+    npm run dev
+    ```
+
+4.  Откройте [http://localhost:3000](http://localhost:3000) в браузере.
+
+---
+
+## 🤝 Контакты
+
+**Artem Zaitsev** — Frontend Developer
+* [GitHub](https://github.com/caskey99)
+* Email: contact@artem.dev
+
+© 2025 Developed with 💻 and ☕

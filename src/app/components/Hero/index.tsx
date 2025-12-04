@@ -6,11 +6,11 @@ import styles from './Hero.module.scss';
 import heroImg from '@/app/assets/hero-image.png'; 
 
 const projects = [
-  { id: 1, title: "Crypto Fintech", cat: "Dashboard", color: "#8a0000" },
-  { id: 2, title: "AI Assistant", cat: "Interface", color: "#00448a" },
-  { id: 3, title: "Cyber eCommerce", cat: "Shop", color: "#008a44" },
-  { id: 4, title: "WebGL Portfolio", cat: "Experience", color: "#8a4400" },
-  { id: 5, title: "Social Network", cat: "Mobile", color: "#44008a" },
+  { id: 1, title: "Crypto Fintech", cat: "Dashboard", color: "#000" }, // Цвет теперь не так важен для бордера, но можно использовать для тегов
+  { id: 2, title: "AI Assistant", cat: "Interface", color: "#000" },
+  { id: 3, title: "Cyber eCommerce", cat: "Shop", color: "#000" },
+  { id: 4, title: "WebGL Portfolio", cat: "Experience", color: "#000" },
+  { id: 5, title: "Social Network", cat: "Mobile", color: "#000" },
 ];
 
 interface HeroProps {
@@ -25,10 +25,9 @@ export default function Hero({ startAnimation }: HeroProps) {
     offset: ["start start", "end end"]
   });
 
-  // Превращаем число в строку для рендера
   const scrollPercentage = useTransform(scrollYProgress, (val) => Math.round(val * 100) + "%");
 
-  // --- ФАЗА 1: ВХОД ---
+  // --- ФАЗА 1: ВХОД (Без изменений) ---
   const imageScale = useTransform(scrollYProgress, [0, 0.15], [1, 0.5]);
   const cardWidth = useTransform(scrollYProgress, [0, 0.15], ["30%", "90%"]);
   const cardHeight = useTransform(scrollYProgress, [0, 0.15], ["0%", "80%"]);
@@ -41,11 +40,13 @@ export default function Hero({ startAnimation }: HeroProps) {
 
   // --- ФАЗА 2: ВКЛЮЧЕНИЕ ---
   const screenOpacity = useTransform(scrollYProgress, [0.15, 0.2], [0, 1]);
-  const flashOpacity = useTransform(scrollYProgress, [0.15, 0.16, 0.2], [0, 1, 0]);
+  // Вспышка теперь черная (выключение света в комнате перед входом в белое), опционально
+  const flashOpacity = useTransform(scrollYProgress, [0.15, 0.16, 0.2], [0, 0.5, 0]);
 
-  // --- ФАЗА 4: ВЫКЛЮЧЕНИЕ ---
-  const monitorScaleY = useTransform(scrollYProgress, [0.85, 0.95], [1, 0.002]);
-  const monitorScaleX = useTransform(scrollYProgress, [0.95, 1], [1, 0]);
+  // --- ФАЗА 4: ВЫКЛЮЧЕНИЕ (Уход в белый экран) ---
+  const monitorScaleY = useTransform(scrollYProgress, [0.85, 0.95], [1, 1.5]); // Увеличиваем монитор, а не схлопываем
+  const monitorScaleX = useTransform(scrollYProgress, [0.85, 0.95], [1, 1.5]);
+  const monitorOpacity = useTransform(scrollYProgress, [0.9, 1], [1, 0]);
 
   const introTextVariants = {
     hidden: { y: "100%", opacity: 0 },
@@ -71,6 +72,7 @@ export default function Hero({ startAnimation }: HeroProps) {
               borderRadius: cardRadius,
               scaleY: monitorScaleY,
               scaleX: monitorScaleX,
+              // opacity: monitorOpacity, // Можно добавить фейд в конце
             }}
           >
              <motion.div className={styles.monitorScreen} style={{ opacity: screenOpacity }}>
@@ -92,8 +94,8 @@ export default function Hero({ startAnimation }: HeroProps) {
 
                 {/* UI OVERLAY */}
                 <div className={styles.uiOverlay}>
-                    <span>SYSTEM: ONLINE</span>
-                    <span>SCROLL: <motion.span>{scrollPercentage}</motion.span></span>
+                    <span>SYSTEM: CLEAN_OS</span>
+                    <span>DEPTH: <motion.span>{scrollPercentage}</motion.span></span>
                 </div>
 
              </motion.div>
@@ -115,7 +117,7 @@ export default function Hero({ startAnimation }: HeroProps) {
                   style={{ 
                     scale: imageScale, 
                     transformOrigin: 'bottom center',
-                    opacity: useTransform(scrollYProgress, [0.15, 0.2], [1, 0.2]) 
+                    opacity: useTransform(scrollYProgress, [0.15, 0.2], [1, 0]) 
                   }}
               >
                 <motion.div 
@@ -160,18 +162,38 @@ export default function Hero({ startAnimation }: HeroProps) {
 
       </div>
       
+      {/* Пустое пространство для скролла */}
       <div style={{ height: '50vh' }}></div>
     </section>
   );
 }
 
 function TunnelCard({ index, total, progress, data }: { index: number, total: number, progress: MotionValue<number>, data: any }) {
+  // Расчет таймингов появления
   const start = 0.20 + (index * (0.50 / total));
-  const end = start + 0.3; 
+  const end = start + 0.4; 
 
-  const scale = useTransform(progress, [start, end], [0, 2]);
-  const opacity = useTransform(progress, [start, start + 0.05, end - 0.1, end], [0, 1, 1, 0]);
-  const y = useTransform(progress, [start, end], ["0%", "-50%"]); 
+  // --- СПИРАЛЬНАЯ МАТЕМАТИКА ---
+  // Каждый блок имеет свой уникальный угол (например, через 70 градусов)
+  const angle = (index * 75) * (Math.PI / 180); // переводим в радианы
+  const radiusX = 600; // Насколько далеко улетает вбок (px)
+  const radiusY = 300; // Насколько далеко улетает вверх/вниз (px)
+
+  // Вычисляем конечные точки полета
+  const xTarget = Math.cos(angle) * radiusX;
+  const yTarget = Math.sin(angle) * radiusY;
+
+  // Анимации
+  const scale = useTransform(progress, [start, end], [0, 1.5]);
+  const opacity = useTransform(progress, [start, start + 0.1, end - 0.1, end], [0, 1, 1, 0]);
+  
+  // Движение по спирали: от центра (0,0) к (xTarget, yTarget)
+  const x = useTransform(progress, [start, end], [0, xTarget]);
+  const y = useTransform(progress, [start, end], [0, yTarget]);
+  
+  // Вращение карточки (вихрь)
+  const rotate = useTransform(progress, [start, end], [0, index % 2 === 0 ? 15 : -15]);
+
   const blur = useTransform(progress, [start, start + 0.1, end - 0.1, end], ["10px", "0px", "0px", "20px"]);
   const display = useTransform(progress, (v) => (v >= start && v <= end ? "flex" : "none"));
 
@@ -179,19 +201,23 @@ function TunnelCard({ index, total, progress, data }: { index: number, total: nu
     <motion.div 
       className={styles.tunnelCard}
       style={{
-        scale, opacity, y, display,
+        scale, 
+        opacity, 
+        x, 
+        y, 
+        rotate,
+        display,
         filter: useTransform(blur, (v) => `blur(${v})`),
         zIndex: index,
-        borderColor: data.color,
-        boxShadow: `0 0 30px ${data.color}40`
       }}
     >
-       <div className={styles.cardInner}>
-          <div className={styles.cardMockup} style={{ backgroundColor: data.color + '20' }} />
-          <div className={styles.cardInfo}>
-             <h3>{data.title}</h3>
-             <p>{data.cat}</p>
-          </div>
+       <div className={styles.cardImage}>
+          {/* Сюда позже можно вставить <Image /> */}
+          {/* <img src="..." alt="" /> */}
+       </div>
+       <div className={styles.cardInfo}>
+          <h3>{data.title}</h3>
+          <p>{data.cat}</p>
        </div>
     </motion.div>
   );
