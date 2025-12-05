@@ -1,22 +1,13 @@
 'use client';
-import { useRef, useState, useEffect } from 'react';
+import { useRef } from 'react';
 import { motion, useScroll, useTransform, MotionValue } from 'framer-motion';
 import Image from 'next/image';
 import styles from './Hero.module.scss';
-import heroImg from '@/app/assets/hero-image.png'; 
-
-const projects = [
-  { id: 1, title: "Crypto Fintech", cat: "Dashboard" },
-  { id: 2, title: "AI Assistant", cat: "Interface" },
-  { id: 3, title: "Cyber eCommerce", cat: "Shop" },
-  { id: 4, title: "WebGL Portfolio", cat: "Experience" },
-  { 
-    id: 5, 
-    title: "Social Network", 
-    cat: "Mobile", 
-    description: "Next-gen social platform focused on privacy." 
-  },
-];
+import heroImg from '@/app/assets/hero-image.png';
+// Imports архитектурного уровня
+import { projects } from '@/app/data/projects';
+import { useIsMobile } from '../../hooks/useIsMobile';
+import { Project } from '@/app/types';
 
 interface HeroProps {
   startAnimation: boolean;
@@ -24,16 +15,8 @@ interface HeroProps {
 
 export default function Hero({ startAnimation }: HeroProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 900);
-    };
-    checkMobile(); 
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  // Используем кастомный хук вместо useEffect внутри компонента
+  const isMobile = useIsMobile(900);
   
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -49,32 +32,30 @@ export default function Hero({ startAnimation }: HeroProps) {
   const screenOpacity = useTransform(scrollYProgress, [0, 0.05], [0, 1]);
   const gridZ = useTransform(scrollYProgress, [0, 0.85], [0, 500]); 
 
-  // --- TEXT ANIMATION (TURBO EVAPORATION) ---
-  // Исчезает ОЧЕНЬ быстро (0 -> 0.05)
-  // Добавляем Blur для эффекта "пара"
-  const textY = useTransform(scrollYProgress, [0, 0.1], ["0%", "-100%"]); // Резкий подъем
-  const textOpacity = useTransform(scrollYProgress, [0, 0.05], [1, 0]);   // Мгновенное исчезновение
-  const textBlur = useTransform(scrollYProgress, [0, 0.05], ["0px", "10px"]); // Размытие в туман
+  // --- TEXT ANIMATION (GLOBAL) ---
+  const textY = useTransform(scrollYProgress, [0, 0.2], ["0%", "-150%"]);
+  const textOpacity = useTransform(scrollYProgress, [0, 0.05], [1, 0]);   
+  const textBlur = useTransform(scrollYProgress, [0, 0.05], ["0px", "10px"]); 
 
   // --- PHOTO ANIMATION ---
   
-  // DESKTOP: Сжаться до 30% (0->0.1) и упасть вниз (0.1->0.25)
+  // DESKTOP
   const desktopScale = useTransform(scrollYProgress, [0, 0.1], [1, 0.3]);
   const desktopY = useTransform(scrollYProgress, [0.1, 0.25], ["0%", "150vh"]);
   const desktopOpacity = useTransform(scrollYProgress, [0.15, 0.25], [1, 0]);
 
-  // MOBILE: Уйти в глубину (scale 0.85)
+  // MOBILE
   const mobileScale = useTransform(scrollYProgress, [0, 0.2], [1, 0.85]);
   const mobileFilter = useTransform(scrollYProgress, [0, 0.2], ["brightness(1)", "brightness(0.4)"]);
   const mobileOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0.6]);
 
-  // Выбор анимации фото
+  // Computed Styles
   const activeImageScale = isMobile ? mobileScale : desktopScale;
   const activeImageY = isMobile ? 0 : desktopY;
   const activeImageOpacity = isMobile ? mobileOpacity : desktopOpacity;
   const activeImageFilter = isMobile ? mobileFilter : "brightness(1)";
 
-  // Intro variants
+  // Intro Variants
   const introTextVariants = {
     hidden: { y: "100%", opacity: 0 },
     visible: { y: 0, opacity: 1, transition: { duration: 0.8, ease: "easeOut", delay: 0.2 } }
@@ -89,7 +70,7 @@ export default function Hero({ startAnimation }: HeroProps) {
       <div className={styles.stickyContainer}>
         <div className={styles.gridContainer}>
           
-          {/* DESKTOP MONITOR */}
+          {/* MONITOR (DESKTOP) */}
           <motion.div 
             className={styles.monitorFrame}
             style={{ width: cardWidth, height: cardHeight, opacity: cardOpacity, borderRadius: cardRadius, borderWidth: cardBorder }}
@@ -149,7 +130,7 @@ export default function Hero({ startAnimation }: HeroProps) {
               </motion.div>
           </div>
 
-          {/* JOB TITLE (Hidden on Mobile via CSS) */}
+          {/* JOB TITLE */}
           <motion.div 
             className={styles.colRight} 
             style={{ y: textY, opacity: textOpacity, filter: textBlur }}
@@ -186,7 +167,9 @@ export default function Hero({ startAnimation }: HeroProps) {
   );
 }
 
-function MobileCard({ data, index }: { data: any, index: number }) {
+// --- SUBCOMPONENTS (TYPED) ---
+
+function MobileCard({ data, index }: { data: Project, index: number }) {
   return (
     <motion.div 
       className={styles.mobCard}
@@ -196,12 +179,12 @@ function MobileCard({ data, index }: { data: any, index: number }) {
       transition={{ duration: 0.5, delay: index * 0.05, ease: "easeOut" }}
     >
       <h3>{data.title}</h3>
-      <p>{data.cat}</p>
+      <p>{data.category}</p>
     </motion.div>
   );
 }
 
-function FlyingCard({ index, total, progress, data }: { index: number, total: number, progress: MotionValue<number>, data: any }) {
+function FlyingCard({ index, total, progress, data }: { index: number, total: number, progress: MotionValue<number>, data: Project }) {
   const START_OFFSET = 0.15; 
   const END_OFFSET = 0.80; 
   const step = (END_OFFSET - START_OFFSET) / (total - 1);
@@ -222,13 +205,13 @@ function FlyingCard({ index, total, progress, data }: { index: number, total: nu
        <div className={styles.cardImage} />
        <div className={styles.cardInfo}>
           <h3>{data.title}</h3>
-          <p>{data.cat}</p>
+          <p>{data.category}</p>
        </div>
     </motion.div>
   );
 }
 
-function LandingCard({ progress, data }: { progress: MotionValue<number>, data: any }) {
+function LandingCard({ progress, data }: { progress: MotionValue<number>, data: Project }) {
   const start = 0.75;
   const landed = 0.90; 
   const life = useTransform(progress, [start, landed], [0, 1]);
@@ -250,7 +233,9 @@ function LandingCard({ progress, data }: { progress: MotionValue<number>, data: 
         <div className={styles.descHeader}><span>LATEST</span><h4>FEATURED WORK</h4></div>
         <h2 className={styles.descTitle}>{data.title}</h2>
         <p className={styles.descText}>{data.description}</p>
-        <div className={styles.descTags}><span>React Native</span><span>Firebase</span><span>Web3</span></div>
+        <div className={styles.descTags}>
+           {data.tags?.map(tag => <span key={tag}>{tag}</span>)}
+        </div>
       </motion.div>
     </>
   );

@@ -1,6 +1,6 @@
 import { Project } from "../types";
 
-export const projectsData: Project[] = [
+export const projects: Project[] = [
   { 
     id: 1, 
     title: "Crypto Fintech", 

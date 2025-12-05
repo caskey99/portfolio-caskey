@@ -1,15 +1,7 @@
 'use client';
 import { motion } from 'framer-motion';
 import styles from './Projects.module.scss';
-
-const projects = [
-  { id: 1, title: "E-Commerce Shop", category: "Web App", image: "" },
-  { id: 2, title: "Crypto Dashboard", category: "Fintech", image: "" },
-  { id: 3, title: "AI Chat Interface", category: "AI / LLM", image: "" },
-  { id: 4, title: "3D Portfolio", category: "WebGL", image: "" },
-  { id: 5, title: "Task Manager", category: "Productivity", image: "" },
-  { id: 6, title: "Social Network", category: "Mobile", image: "" },
-];
+import { projects } from '@/app/data/projects'; // Импорт данных
 
 export default function Projects() {
   return (
