@@ -26,14 +26,11 @@ export default function Hero({ startAnimation }: HeroProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Определение мобильного устройства при загрузке
-  // Безопасно, так как Preloader скрывает начальное состояние
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 900);
     };
-    
-    checkMobile(); // Initial check
+    checkMobile(); 
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
@@ -43,7 +40,7 @@ export default function Hero({ startAnimation }: HeroProps) {
     offset: ["start start", "end end"]
   });
 
-  // --- ОБЩИЕ ПЕРЕМЕННЫЕ (MONITOR & TUNNEL) ---
+  // --- COMMON VARS ---
   const cardWidth = useTransform(scrollYProgress, [0, 0.1], ["30%", "100vw"]);
   const cardHeight = useTransform(scrollYProgress, [0, 0.1], ["0%", "100vh"]);
   const cardRadius = useTransform(scrollYProgress, [0, 0.1], ["100px", "0px"]);
@@ -52,35 +49,32 @@ export default function Hero({ startAnimation }: HeroProps) {
   const screenOpacity = useTransform(scrollYProgress, [0, 0.05], [0, 1]);
   const gridZ = useTransform(scrollYProgress, [0, 0.85], [0, 500]); 
 
-  // --- ТЕКСТ (ИМЯ) ---
-  // Desktop: разъезжается в стороны. Mobile: уезжает вверх.
-  const textLeftX = useTransform(scrollYProgress, [0, 0.1], [0, -300]);
-  const textRightX = useTransform(scrollYProgress, [0, 0.1], [0, 300]);
-  const mobileNameY = useTransform(scrollYProgress, [0, 0.15], ["0%", "-120%"]);
-  const mobileNameOpacity = useTransform(scrollYProgress, [0, 0.1], [1, 0]);
+  // --- TEXT ANIMATION (TURBO EVAPORATION) ---
+  // Исчезает ОЧЕНЬ быстро (0 -> 0.05)
+  // Добавляем Blur для эффекта "пара"
+  const textY = useTransform(scrollYProgress, [0, 0.1], ["0%", "-100%"]); // Резкий подъем
+  const textOpacity = useTransform(scrollYProgress, [0, 0.05], [1, 0]);   // Мгновенное исчезновение
+  const textBlur = useTransform(scrollYProgress, [0, 0.05], ["0px", "10px"]); // Размытие в туман
 
-  // --- ФОТОГРАФИЯ (РАЗДЕЛЕНИЕ ЛОГИКИ) ---
+  // --- PHOTO ANIMATION ---
+  
+  // DESKTOP: Сжаться до 30% (0->0.1) и упасть вниз (0.1->0.25)
+  const desktopScale = useTransform(scrollYProgress, [0, 0.1], [1, 0.3]);
+  const desktopY = useTransform(scrollYProgress, [0.1, 0.25], ["0%", "150vh"]);
+  const desktopOpacity = useTransform(scrollYProgress, [0.15, 0.25], [1, 0]);
 
-  // 1. DESKTOP LOGIC (ПК): "Уменьшиться и уехать вниз"
-  // Scale: 0 -> 10% скролла (быстрое уменьшение перед отъездом)
-  const desktopScale = useTransform(scrollYProgress, [0, 0.15], [1, 0.8]);
-  // Y: 10% -> 30% скролла (уезжает вниз, освобождая место карточкам)
-  const desktopY = useTransform(scrollYProgress, [0.1, 0.35], ["0%", "120%"]);
-  // Opacity: исчезает, когда уже почти уехал
-  const desktopOpacity = useTransform(scrollYProgress, [0.3, 0.4], [1, 0]);
-
-  // 2. MOBILE LOGIC (ТЕЛЕФОН): "Отъехать в глубину и затемниться"
+  // MOBILE: Уйти в глубину (scale 0.85)
   const mobileScale = useTransform(scrollYProgress, [0, 0.2], [1, 0.85]);
   const mobileFilter = useTransform(scrollYProgress, [0, 0.2], ["brightness(1)", "brightness(0.4)"]);
-  const mobileOpacity = useTransform(scrollYProgress, [0, 0.4], [1, 0.6]);
+  const mobileOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0.6]);
 
-  // ВЫБОР ЗНАЧЕНИЙ НА ОСНОВЕ STATE
+  // Выбор анимации фото
   const activeImageScale = isMobile ? mobileScale : desktopScale;
-  const activeImageY = isMobile ? "0%" : desktopY; // На мобиле Y не меняем (sticky контейнер держит), на ПК уезжает
+  const activeImageY = isMobile ? 0 : desktopY;
   const activeImageOpacity = isMobile ? mobileOpacity : desktopOpacity;
   const activeImageFilter = isMobile ? mobileFilter : "brightness(1)";
 
-  // Входная анимация (при загрузке страницы)
+  // Intro variants
   const introTextVariants = {
     hidden: { y: "100%", opacity: 0 },
     visible: { y: 0, opacity: 1, transition: { duration: 0.8, ease: "easeOut", delay: 0.2 } }
@@ -115,12 +109,7 @@ export default function Hero({ startAnimation }: HeroProps) {
           {/* NAME */}
           <motion.div 
             className={styles.colLeft} 
-            /* На десктопе работает x, на мобиле y (через media query position absolute) */
-            style={{ 
-                x: textLeftX, 
-                y: mobileNameY, 
-                opacity: isMobile ? mobileNameOpacity : 1 
-            }}
+            style={{ y: textY, opacity: textOpacity, filter: textBlur }}
           >
              <div className={styles.textMask}>
                 <motion.div initial="hidden" animate={startAnimation ? "visible" : "hidden"} variants={introTextVariants}>
@@ -129,7 +118,7 @@ export default function Hero({ startAnimation }: HeroProps) {
              </div>
           </motion.div>
 
-          {/* PHOTO CENTER */}
+          {/* PHOTO */}
           <div className={styles.colCenter}>
               <motion.div 
                   className={styles.imageMotionWrapper}
@@ -160,8 +149,11 @@ export default function Hero({ startAnimation }: HeroProps) {
               </motion.div>
           </div>
 
-          {/* JOB TITLE */}
-          <motion.div className={styles.colRight} style={{ x: textRightX }}>
+          {/* JOB TITLE (Hidden on Mobile via CSS) */}
+          <motion.div 
+            className={styles.colRight} 
+            style={{ y: textY, opacity: textOpacity, filter: textBlur }}
+          >
              <div className={styles.textMask}>
                 <motion.div initial="hidden" animate={startAnimation ? "visible" : "hidden"} variants={introTextVariants}>
                   <h2 className={styles.job}>Frontend<br/>Developer</h2>
@@ -209,7 +201,6 @@ function MobileCard({ data, index }: { data: any, index: number }) {
   );
 }
 
-// --- DESKTOP HELPERS ---
 function FlyingCard({ index, total, progress, data }: { index: number, total: number, progress: MotionValue<number>, data: any }) {
   const START_OFFSET = 0.15; 
   const END_OFFSET = 0.80; 
